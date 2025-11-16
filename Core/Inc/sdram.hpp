@@ -1,0 +1,16 @@
+#pragma once
+
+#include "main.h"
+
+
+// saram model IS42S32800J-6TLI 2meg x 32 bits x 4 banks
+namespace bsp {
+    namespace sdram {
+        /**
+        * @brief  执行 SDRAM 初始化命令序列
+        * @param  hsdram: 指向 SDRAM 句柄的指针
+        * @retval HAL_StatusTypeDef HAL_OK 表示成功
+        */
+        HAL_StatusTypeDef init_sequence(SDRAM_HandleTypeDef *hsdram);
+    } // namespace sdram
+}

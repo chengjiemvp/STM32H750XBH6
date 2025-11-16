@@ -123,7 +123,9 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void call_mpu_config(void) {
+  MPU_Config();
+}
 /* USER CODE END 4 */
 
  /* MPU Configuration */
