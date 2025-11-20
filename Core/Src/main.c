@@ -141,7 +141,7 @@ void MPU_Config(void)
   */
   MPU_InitStruct.Enable = MPU_REGION_ENABLE;
   MPU_InitStruct.Number = MPU_REGION_NUMBER0;
-  MPU_InitStruct.BaseAddress = 0x0;
+  MPU_InitStruct.BaseAddress = 0x00000000 ;
   MPU_InitStruct.Size = MPU_REGION_SIZE_4GB;
   MPU_InitStruct.SubRegionDisable = 0x87;
   MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;

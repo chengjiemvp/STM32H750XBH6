@@ -61,6 +61,7 @@ RAM_D2 (xrw)      : ORIGIN = 0x30000000, LENGTH = 288K
 RAM_D3 (xrw)      : ORIGIN = 0x38000000, LENGTH = 64K
 ITCMRAM (xrw)      : ORIGIN = 0x00000000, LENGTH = 64K
 FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 128K
+SDRAM (xrw)      : ORIGIN = 0xC0000000, LENGTH = 32M
 }
 
 /* Highest address of the user mode stack */
@@ -240,7 +241,16 @@ SECTIONS
     . = ALIGN(8);
   } >DTCMRAM
 
-
+  /* SDRAM section for large buffers (added by user) */
+  .sdram (NOLOAD) :
+  {
+    . = ALIGN(4);
+    _ssdram = .;       /* SDRAM start marker */
+    *(.sdram)
+    *(.sdram*)
+    . = ALIGN(4);
+    _esdram = .;       /* SDRAM end marker */
+  } >SDRAM
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
