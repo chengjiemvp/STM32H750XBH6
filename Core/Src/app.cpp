@@ -1,20 +1,13 @@
+#include <cstdio>
 #include "main.h"
 #include "gpio.h"
 #include "fmc.h"
 #include "sdram.hpp"
 #include "test.hpp"
+#include "usart.h"
+#include "rtc.h"
+#include "bsp_setup.hpp"
 
-volatile uint32_t sink;
-void cpu_stress_single_core() {
-    for (;;) {
-        // 简单但不可优化的整型运算
-        uint32_t a = 0xA5A5A5A5;
-        for (int i = 0; i < 1000; ++i) {
-        a = (a << 1) ^ (a >> 3) ^ (a * 2654435761u);
-        }
-        sink ^= a;
-    }
-}
 
 int main(void) {
     // set up MPU before initializing HAL
@@ -28,10 +21,23 @@ int main(void) {
     MX_GPIO_Init();
     MX_FMC_Init();
     bsp::sdram::init_sequence(&hsdram1);
-    // test functions, e.g., test sdram
-    my_test::test_sdram();
+    MX_RTC_Init();
+    MX_USART1_UART_Init();
 
-    cpu_stress_single_core();
+    // test functions, e.g., test sdram
+    printf("[DEG] system init complete\n");
+    printf("[DEG] running sdram test...\n");
+    my_test::test_sdram();
+    printf("[DEG] sdram test passed\n");
+    bsp_setup::RTCDateTime rtc_date_time = bsp_setup::rtc_setup();
+    printf("[DEG] rtc setup at: 20%02d-%02d-%02d %02d:%02d:%02d\n", 
+        rtc_date_time.date.Year,
+        rtc_date_time.date.Month,
+        rtc_date_time.date.Date,
+        rtc_date_time.time.Hours,
+        rtc_date_time.time.Minutes,
+        rtc_date_time.time.Seconds
+    );
 
     while (1) {
         HAL_Delay(1);

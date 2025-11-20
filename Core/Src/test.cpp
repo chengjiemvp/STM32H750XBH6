@@ -128,4 +128,15 @@ namespace my_test {
         (void)ok; // 若需进一步处理，依据 ok 做日志或复位
     }
 
+    volatile uint32_t sink;
+    void cpu_stress_single_core() {
+        for (;;) {
+            // 简单但不可优化的整型运算
+            uint32_t a = 0xA5A5A5A5;
+            for (int i = 0; i < 1000; ++i) {
+            a = (a << 1) ^ (a >> 3) ^ (a * 2654435761u);
+            }
+            sink ^= a;
+        }
+    }
 } 

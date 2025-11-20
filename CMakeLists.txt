@@ -50,6 +50,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/app.cpp
     Core/Src/sdram.cpp
     Core/Src/test.cpp
+    Core/Src/bsp_setup.cpp
 )
 
 # Add include paths
