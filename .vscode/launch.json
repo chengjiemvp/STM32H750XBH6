@@ -1,21 +1,24 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Cortex Debug (ST-Link GDB Server)",
-            "cwd": "${workspaceFolder}",
-            "executable": "${workspaceFolder}/build/Debug/STM32H750XBH6.elf",
-            "request": "launch",
-            "type": "cortex-debug",
-            "runToEntryPoint": "main",
-            "servertype": "stlink",
-            "device": "STM32H750XB",
-            "v1": false,
-            "serverpath": "C:/ST/STM32CubeCLT_1.19.0/STLink-gdb-server/bin/ST-LINK_gdbserver.exe",
-            "armToolchainPath": "C:/ST/STM32CubeCLT_1.19.0/GNU-tools-for-STM32/bin",
-            "stlinkPath": "C:/ST/STM32CubeCLT_1.19.0/STM32CubeProgrammer/bin",
-            "preLaunchTask": "CMake: build",
-            "showDevDebugOutput": "none"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Cortex Debug (ST-Link GDB Server)",
+      "type": "cortex-debug",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/Debug/STM32H750XBH6.elf",
+      "servertype": "stlink",
+      "device": "STM32H750XB",
+      "v1": false,
+      "serverpath": "C:/ST/STM32CubeCLT_1.19.0/STLink-gdb-server/bin/ST-LINK_gdbserver.exe",
+      "gdbPath": "C:/ST/STM32CubeCLT_1.19.0/GNU-tools-for-STM32/bin/arm-none-eabi-gdb.exe",
+      "armToolchainPath": "C:/ST/STM32CubeCLT_1.19.0/GNU-tools-for-STM32/bin",
+      "stlinkPath": "C:/ST/STM32CubeCLT_1.19.0/STM32CubeProgrammer/bin",
+      "runToEntryPoint": "main",
+      "postRestartCommands": [
+        "monitor reset halt"
+      ],
+      "showDevDebugOutput": "none"
+    }
+  ]
 }

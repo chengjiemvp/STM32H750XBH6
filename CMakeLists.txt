@@ -51,6 +51,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/sdram.cpp
     Core/Src/test.cpp
     Core/Src/bsp_setup.cpp
+    Core/Src/qspi_w25q256.cpp
 )
 
 # Add include paths
@@ -71,4 +72,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
 
     # Add user defined libraries
+)
+
+target_link_options(
+    ${CMAKE_PROJECT_NAME} PRIVATE -u _printf_float
 )
