@@ -95,7 +95,7 @@ uint32_t QSPI_W25Qxx_ReadID(void) {
 	return W25Qxx_ID; // 返回ID
 }
 
-// 使用自动轮询标志查询，等待通信结束, 每一次通信都应该调用次函数，等待通信结束，避免错误的操作
+/// @brief 使用自动轮询标志查询，等待通信结束, 每一次通信都应该调用次函数，等待通信结束，避免错误的操作
 int8_t QSPI_W25Qxx_AutoPollingMemReady(void) {
 	QSPI_CommandTypeDef     s_command;	                        // QSPI传输配置
 	QSPI_AutoPollingTypeDef s_config;		                    // 轮询比较相关配置参数
@@ -119,7 +119,7 @@ int8_t QSPI_W25Qxx_AutoPollingMemReady(void) {
 	s_config.AutomaticStop   = QSPI_AUTOMATIC_STOP_ENABLE;	    // 自动停止模式
 	s_config.StatusBytesSize = 1;	                        	// 状态字节数
 	s_config.Mask            = W25Qxx_Status_REG1_BUSY;	        // 掩码，只比较BUSY位
-		
+
 	// 发送轮询等待命令
 	if (HAL_QSPI_AutoPolling(&hqspi, &s_command, &s_config, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK) {
 		return static_cast<int8_t>(W25QxxResult::AutopollingFail);
@@ -140,7 +140,7 @@ int8_t QSPI_W25Qxx_Test(void) {
 	QSPI_Status 			= QSPI_W25Qxx_BlockErase_64K(W25Qxx_TestAddr);	// 擦除64K字节
 	ExecutionTime_End		= HAL_GetTick();	                            // 获取 systick 当前时间，单位ms
 	ExecutionTime           = ExecutionTime_End - ExecutionTime_Begin;      // 计算擦除时间，单位ms
-	
+
 	if( QSPI_Status == QSPI_W25Qxx_OK ) {
 		printf ("[LOG] W25Q256 erase success, time consuming: %lu ms\r\n", (unsigned long)ExecutionTime);		
 	}
@@ -148,7 +148,7 @@ int8_t QSPI_W25Qxx_Test(void) {
 		printf ("[ERR] erase error!  error code: %lu\r\n", (unsigned long)QSPI_Status);
 		while (1);
 	}
-	
+
     // 写入 >>>>>>>
 	for(i=0; i<W25Qxx_NumByteToTest; i++) {     // 先将数据写入数组
 		W25Qxx_WriteBuffer[i] = i;
@@ -156,7 +156,7 @@ int8_t QSPI_W25Qxx_Test(void) {
 	ExecutionTime_Begin 	= HAL_GetTick();	// 获取 systick 当前时间，单位ms
 	QSPI_Status				= QSPI_W25Qxx_WriteBuffer(W25Qxx_WriteBuffer,W25Qxx_TestAddr,W25Qxx_NumByteToTest); // 写入数据
 	ExecutionTime_End		= HAL_GetTick();	// 获取 systick 当前时间，单位ms
-	
+
 	ExecutionTime   = ExecutionTime_End - ExecutionTime_Begin; 		 // 计算擦除时间，单位ms
 	ExecutionSpeed  = (float)W25Qxx_NumByteToTest / ExecutionTime ;  // 计算写入速度，单位 KB/S
 	if( QSPI_Status == QSPI_W25Qxx_OK ) {
@@ -167,7 +167,7 @@ int8_t QSPI_W25Qxx_Test(void) {
 		printf ("[ERR] write error!  error code: %ld\r\n",(long)QSPI_Status);
 		while (1);
 	}
-	
+
     // 读取 >>>>>>>
 	QSPI_Status = QSPI_W25Qxx_MemoryMappedMode(); // 配置QSPI为内存映射模式
 	if( QSPI_Status == QSPI_W25Qxx_OK ) {
@@ -177,14 +177,14 @@ int8_t QSPI_W25Qxx_Test(void) {
 		printf ("[ERR] memory-mapped mode error!  error code: %ld\r\n",(long)QSPI_Status);
 		while (1);
 	}
-	
+
 	ExecutionTime_Begin 	= HAL_GetTick();	                                // 获取 systick 当前时间，单位ms
     // 从 QSPI_Mem_Addr +W25Qxx_TestAddr 地址处，拷贝数据到 W25Qxx_ReadBuffer
 	memcpy(W25Qxx_ReadBuffer,(uint8_t *)W25Qxx_MemAddr+W25Qxx_TestAddr,W25Qxx_NumByteToTest);
 	ExecutionTime_End = HAL_GetTick();	                                        // 获取 systick 当前时间，单位ms
 	ExecutionTime     = ExecutionTime_End - ExecutionTime_Begin; 				// 计算擦除时间，单位ms
 	ExecutionSpeed    = (float)W25Qxx_NumByteToTest / ExecutionTime / 1024 ; 	// 计算读取速度，单位 MB/S 
-	
+
 	if( QSPI_Status == QSPI_W25Qxx_OK ) {
 		printf ("[LOG] read success, data size: %lu KB, time consuming: %lu ms, speed: %.2f MB/S\r\n",
             (unsigned long)W25Qxx_NumByteToTest/1024, (unsigned long)ExecutionTime, ExecutionSpeed);		
@@ -202,7 +202,7 @@ int8_t QSPI_W25Qxx_Test(void) {
 		}
 	}
 	printf ("[LOG] data validation success! QSPI W25Q256 test passed\r\n");		
-	
+
     // 读取整片Flash的数据，用以测试速度 >>>>>>> 
 	printf ("[LOG] in test above data size too small, now read all data, reading>>>>\r\n");
 
@@ -413,7 +413,7 @@ int8_t QSPI_W25Qxx_WritePage(uint8_t* pBuffer, uint32_t WriteAddr, uint16_t NumB
 // 2.这里使用的是1-4-4模式下(1线指令4线地址4线数据)，快速读取指令 Fast Read Quad I/O
 // 3.使用快速读取指令是有空周期的，具体参考W25Q256JV的手册  Fast Read Quad I/O  （0xEB）指令
 // 4.实际使用中，是否使用DMA、编译器的优化等级以及数据存储区的位置(内部 TCM SRAM 或者 AXI SRAM)都会影响读取的速度
-// 5.在本例程中，使用的是库函数进行直接读写，keil版本5.30，编译器AC6.14，编译等级Oz image size，读取速度为 7M字节/S ，
+// 5.在本例程中，使用的是库函数进行直接读写，编译器AC6.14，编译等级Oz image size，读取速度为 7M字节/S ，
 //      数据放在 TCM SRAM 或者 AXI SRAM 都是差不多的结果
 // 6.因为CPU直接访问外设寄存器的效率很低，直接使用HAL库进行读写的话，速度很慢，使用MDMA进行读取，可以达到 58M字节/S
 // 7.W25Q256JV 所允许的最高驱动频率为133MHz，750的QSPI最高驱动频率也是133MHz ，但是对于HAL库函数直接读取而言，
