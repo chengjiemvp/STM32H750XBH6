@@ -8,8 +8,8 @@ extern QSPI_HandleTypeDef hqspi;	                             // 定义QSPI句�
 inline constexpr std::size_t W25Qxx_NumByteToTest = 32u * 1024u; // 32768 bytes (32 KiB)
 int32_t  QSPI_Status ; 		                                     // 检测标志位
 uint32_t W25Qxx_TestAddr  =	0x1A20000	;				         // 测试地址
-uint8_t  W25Qxx_WriteBuffer[W25Qxx_NumByteToTest];		         // 写数据数组
-uint8_t  W25Qxx_ReadBuffer [W25Qxx_NumByteToTest];		         // 读数据数组
+uint8_t  W25Qxx_WriteBuffer[W25Qxx_NumByteToTest] __attribute__((section(".sdram"))); // 写数据数组
+uint8_t  W25Qxx_ReadBuffer [W25Qxx_NumByteToTest] __attribute__((section(".sdram"))); // 读数据数组
 
 int8_t QSPI_W25Qxx_Init(void) {
     uint32_t Device_ID;	                                        // 器件ID
@@ -19,19 +19,18 @@ int8_t QSPI_W25Qxx_Init(void) {
 	
 	if( Device_ID == W25Qxx_FLASH_ID ) {
         // 初始化成功
-		printf ("[LOG] W25Q256 OK,flash ID:%X\r\n",static_cast<unsigned int>(Device_ID));
+		printf ("[LOG] W25Q256 OK,flash ID: %X\r\n",static_cast<unsigned int>(Device_ID));
 		return QSPI_W25Qxx_OK;                                  // 返回成功标志		
 	}
 	else {
         // 初始化失败
-		printf ("[ERR] W25Q256 ERROR!!!!!  ID:%X\r\n",static_cast<unsigned int>(Device_ID));
+		printf ("[ERR] W25Q256 ERROR!  ID: %X\r\n",static_cast<unsigned int>(Device_ID));
 		return static_cast<uint8_t>(W25QxxResult::InitError);   // 返回错误标志
 	}
 }
 
 int8_t QSPI_W25Qxx_Reset(void) {
-	QSPI_CommandTypeDef s_command;	// QSPI传输配置
-
+	QSPI_CommandTypeDef s_command;	                            // QSPI传输配置
 	s_command.InstructionMode    = QSPI_INSTRUCTION_1_LINE;   	// 1线指令模式
 	s_command.AddressMode 		 = QSPI_ADDRESS_NONE;   		// 无地址模式
 	s_command.AlternateByteMode  = QSPI_ALTERNATE_BYTES_NONE; 	// 无交替字节 
@@ -65,8 +64,7 @@ int8_t QSPI_W25Qxx_Reset(void) {
 	return QSPI_W25Qxx_OK;	                                    // 复位成功
 }
 
-uint32_t QSPI_W25Qxx_ReadID(void)	
-{
+uint32_t QSPI_W25Qxx_ReadID(void) {
 	QSPI_CommandTypeDef s_command;	                            // QSPI传输配置
 	uint8_t	QSPI_ReceiveBuff[3];		                        // 存储QSPI读到的数据
 	uint32_t	W25Qxx_ID;					                    // 器件的ID
@@ -104,12 +102,12 @@ int8_t QSPI_W25Qxx_AutoPollingMemReady(void) {
 
 	s_command.InstructionMode   = QSPI_INSTRUCTION_1_LINE;		// 1线指令模式
 	s_command.AddressMode       = QSPI_ADDRESS_NONE;			// 无地址模式
-	s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;	//	无交替字节 
+	s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;	// 无交替字节 
 	s_command.DdrMode           = QSPI_DDR_MODE_DISABLE;	    // 禁止DDR模式
 	s_command.DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;	// DDR模式中数据延迟，这里用不到
-	s_command.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;	   	//	每次传输数据都发送指令	
+	s_command.SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;	   	// 每次传输数据都发送指令	
 	s_command.DataMode          = QSPI_DATA_1_LINE;				// 1线数据模式
-	s_command.DummyCycles       = 0;							//	空周期个数
+	s_command.DummyCycles       = 0;							// 空周期个数
 	s_command.Instruction       = W25Qxx_CMD_ReadStatus_REG1;	// 读状态信息寄存器
 
     // 不停的查询 W25Qxx_CMD_ReadStatus_REG1 寄存器，将读取到的状态字节中的 
@@ -144,15 +142,15 @@ int8_t QSPI_W25Qxx_Test(void) {
 	ExecutionTime           = ExecutionTime_End - ExecutionTime_Begin;      // 计算擦除时间，单位ms
 	
 	if( QSPI_Status == QSPI_W25Qxx_OK ) {
-		printf ("[LOG] W25Q256 擦除成功, 擦除所需时间: %lu ms\r\n", (unsigned long)ExecutionTime);		
+		printf ("[LOG] W25Q256 erase success, time consuming: %lu ms\r\n", (unsigned long)ExecutionTime);		
 	}
 	else {
-		printf ("[ERR] 擦除失败!!!!!  错误代码:%lu\r\n", (unsigned long)QSPI_Status);
+		printf ("[ERR] erase error!  error code: %lu\r\n", (unsigned long)QSPI_Status);
 		while (1);
 	}
 	
     // 写入 >>>>>>>
-	for(i=0; i<W25Qxx_NumByteToTest; i++) {     //先将数据写入数组
+	for(i=0; i<W25Qxx_NumByteToTest; i++) {     // 先将数据写入数组
 		W25Qxx_WriteBuffer[i] = i;
 	}
 	ExecutionTime_Begin 	= HAL_GetTick();	// 获取 systick 当前时间，单位ms
@@ -162,22 +160,21 @@ int8_t QSPI_W25Qxx_Test(void) {
 	ExecutionTime   = ExecutionTime_End - ExecutionTime_Begin; 		 // 计算擦除时间，单位ms
 	ExecutionSpeed  = (float)W25Qxx_NumByteToTest / ExecutionTime ;  // 计算写入速度，单位 KB/S
 	if( QSPI_Status == QSPI_W25Qxx_OK ) {
-		printf ("[LOG] 写入成功,数据大小：%lu KB, 耗时: %lu ms, 写入速度：%.2f KB/s\r\n",
+		printf ("[LOG] write success, data size: %lu KB, time consuming: %lu ms, speed: %.2f KB/S\r\n",
             (unsigned long)W25Qxx_NumByteToTest/1024, (unsigned long)ExecutionTime, ExecutionSpeed);		
 	}
 	else {
-		printf ("[ERR] 写入错误!!!!!  错误代码:%ld\r\n",(long)QSPI_Status);
+		printf ("[ERR] write error!  error code: %ld\r\n",(long)QSPI_Status);
 		while (1);
 	}
 	
-    // 读取 >>>>>>>    
-	// printf ("\r\n*****************************************************************************************************\r\n");
+    // 读取 >>>>>>>
 	QSPI_Status = QSPI_W25Qxx_MemoryMappedMode(); // 配置QSPI为内存映射模式
 	if( QSPI_Status == QSPI_W25Qxx_OK ) {
-		printf ("[LOG] 进入内存映射模式成功,开始读取>>>>\r\n");		
+		printf ("[LOG] successfully entered memory-mapped mode, reading>>>>\r\n");		
 	}
 	else {
-		printf ("[ERR] 内存映射错误!!  错误代码:%ld\r\n",(long)QSPI_Status);
+		printf ("[ERR] memory-mapped mode error!  error code: %ld\r\n",(long)QSPI_Status);
 		while (1);
 	}
 	
@@ -189,32 +186,29 @@ int8_t QSPI_W25Qxx_Test(void) {
 	ExecutionSpeed    = (float)W25Qxx_NumByteToTest / ExecutionTime / 1024 ; 	// 计算读取速度，单位 MB/S 
 	
 	if( QSPI_Status == QSPI_W25Qxx_OK ) {
-		printf ("[LOG] 读取成功,数据大小：%lu KB, 耗时: %lu ms, 读取速度：%.2f MB/s \r\n",
+		printf ("[LOG] read success, data size: %lu KB, time consuming: %lu ms, speed: %.2f MB/S\r\n",
             (unsigned long)W25Qxx_NumByteToTest/1024, (unsigned long)ExecutionTime, ExecutionSpeed);		
 	}
 	else {
-		printf ("[ERR] 读取错误!!!!!  错误代码:%ld\r\n",(long)QSPI_Status);
+		printf ("[ERR] read error!  error code: %ld\r\n",(long)QSPI_Status);
 		while (1);
 	}
-	
+
     // 数据校验 >>>>>>>
-	for(i=0; i<W25Qxx_NumByteToTest; i++)	{                   //验证读出的数据是否等于写入的数据
-		if( W25Qxx_WriteBuffer[i] != W25Qxx_ReadBuffer[i] ) {	//如果数据不相等，则返回0
-			printf ("[ERR] 数据校验失败!!!!!\r\n");	
+	for(i=0; i<W25Qxx_NumByteToTest; i++)	{                   // 验证读出的数据是否等于写入的数据
+		if( W25Qxx_WriteBuffer[i] != W25Qxx_ReadBuffer[i] ) {	// 如果数据不相等，则返回0
+			printf ("[ERR] data validation failed!\r\n");	
 			while(1) {};
 		}
 	}
-	printf ("[LOG] 校验通过!!!!! QSPI驱动W25Q256测试正常\r\n");		
+	printf ("[LOG] data validation success! QSPI W25Q256 test passed\r\n");		
 	
-    // 读取整片Flash的数据，用以测试速度 >>>>>>>  	
-	// printf ("*****************************************************************************************************\r\n");
-	printf ("[LOG] 上面的测试中, 读取的数据比较小,耗时很短,加之测量的最小单位为ms,计算出的读取速度误差较大\r\n");		
-	printf ("[LOG] 接下来读取整片flash的数据用以测试速度,这样得出的速度误差比较小\r\n");		
-	printf ("[LOG] 开始读取>>>>\r\n");		
-	
+    // 读取整片Flash的数据，用以测试速度 >>>>>>> 
+	printf ("[LOG] in test above data size too small, now read all data, reading>>>>\r\n");
+
 	W25Qxx_TestAddr         = 0;                                // 从0开始
 	ExecutionTime_Begin 	= HAL_GetTick();	                // 获取 systick 当前时间，单位ms		
-	
+
 	for(i=0; i<W25Qxx_FlashSize/(W25Qxx_NumByteToTest); i++) {	// 每次读取 W25Qxx_NumByteToTest 字节的数据
         // 从 QSPI_Mem_Addr 地址处，拷贝数据到 W25Qxx_ReadBuffer
 		memcpy(W25Qxx_ReadBuffer,(uint8_t *)W25Qxx_MemAddr+W25Qxx_TestAddr,W25Qxx_NumByteToTest);
@@ -225,19 +219,18 @@ int8_t QSPI_W25Qxx_Test(void) {
 	ExecutionSpeed          = (float)W25Qxx_FlashSize / ExecutionTime / 1024 ; 	// 计算读取速度，单位 MB/S 
 
 	if( QSPI_Status == QSPI_W25Qxx_OK ) {
-		printf ("[LOG] 读取成功,数据大小：%lu MB, 耗时: %lu ms, 读取速度：%.2f MB/s \r\n",
+		printf ("[LOG] read success, data size: %lu MB, time consuming: %lu ms, speed: %.2f MB/S \r\n",
             (unsigned long)W25Qxx_FlashSize/1024/1024, (unsigned long)ExecutionTime, ExecutionSpeed);		
 	}
 	else {
-		printf ("[ERR] 读取错误!!!!!  错误代码:%ld\r\n",(long)QSPI_Status);
+		printf ("[ERR] read error!  error code:%ld\r\n",(long)QSPI_Status);
 		while (1);
 	}
-	
+
 	return QSPI_W25Qxx_OK ;  // 测试通过	
 }
 
-int8_t QSPI_W25Qxx_MemoryMappedMode(void)
-{
+int8_t QSPI_W25Qxx_MemoryMappedMode(void) {
 	QSPI_CommandTypeDef      s_command;				 // QSPI传输配置
 	QSPI_MemoryMappedTypeDef s_mem_mapped_cfg;	     // 内存映射访问参数
 
@@ -264,13 +257,12 @@ int8_t QSPI_W25Qxx_MemoryMappedMode(void)
 }
 
 // 进行块擦除操作，每次擦除64K字节，按照 W25Q256JV 数据手册给出的擦除参考时间，典型值为 150ms，最大值为2000ms
-int8_t QSPI_W25Qxx_BlockErase_64K (uint32_t SectorAddress)	
-{
+int8_t QSPI_W25Qxx_BlockErase_64K (uint32_t SectorAddress) {
 	QSPI_CommandTypeDef s_command;	// QSPI传输配置
 	
 	s_command.InstructionMode   	= QSPI_INSTRUCTION_1_LINE;    // 1线指令模式
 	s_command.AddressSize       	= QSPI_ADDRESS_32_BITS;       // 32位地址
-	s_command.AlternateByteMode 	= QSPI_ALTERNATE_BYTES_NONE;  //	无交替字节 
+	s_command.AlternateByteMode 	= QSPI_ALTERNATE_BYTES_NONE;  // 无交替字节 
 	s_command.DdrMode           	= QSPI_DDR_MODE_DISABLE;      // 禁止DDR模式
 	s_command.DdrHoldHalfCycle  	= QSPI_DDR_HHC_ANALOG_DELAY;  // DDR模式中数据延迟，这里用不到
 	s_command.SIOOMode          	= QSPI_SIOO_INST_EVERY_CMD;	  // 每次传输数据都发送指令
@@ -340,8 +332,7 @@ int8_t QSPI_W25Qxx_WriteEnable(void) {
 // 4.Flash使用的时间越长，写入所需时间也会越长
 // 5.在数据写入之前，请务必完成擦除操作
 // 6.该函数移植于 stm32h743i_eval_qspi.c
-int8_t QSPI_W25Qxx_WriteBuffer(uint8_t* pBuffer, uint32_t WriteAddr, uint32_t Size)
-{	
+int8_t QSPI_W25Qxx_WriteBuffer(uint8_t* pBuffer, uint32_t WriteAddr, uint32_t Size) {
 	uint32_t end_addr, current_size, current_addr;
 	uint8_t *write_data;  // 要写入的数据
 	current_size = W25Qxx_PageSize - (WriteAddr % W25Qxx_PageSize); // 计算当前页还剩余的空间
@@ -383,8 +374,7 @@ int8_t QSPI_W25Qxx_WriteBuffer(uint8_t* pBuffer, uint32_t WriteAddr, uint32_t Si
 // 3.实际的写入速度可能大于0.4ms，也可能小于0.4ms
 // 4.Flash使用的时间越长，写入所需时间也会越长
 // 5.在数据写入之前，请务必完成擦除操作
-int8_t QSPI_W25Qxx_WritePage(uint8_t* pBuffer, uint32_t WriteAddr, uint16_t NumByteToWrite)
-{
+int8_t QSPI_W25Qxx_WritePage(uint8_t* pBuffer, uint32_t WriteAddr, uint16_t NumByteToWrite) {
 	QSPI_CommandTypeDef s_command;	// QSPI传输配置	
 	
 	s_command.InstructionMode    = QSPI_INSTRUCTION_1_LINE;    		// 1线指令模式
@@ -428,8 +418,7 @@ int8_t QSPI_W25Qxx_WritePage(uint8_t* pBuffer, uint32_t WriteAddr, uint16_t NumB
 // 6.因为CPU直接访问外设寄存器的效率很低，直接使用HAL库进行读写的话，速度很慢，使用MDMA进行读取，可以达到 58M字节/S
 // 7.W25Q256JV 所允许的最高驱动频率为133MHz，750的QSPI最高驱动频率也是133MHz ，但是对于HAL库函数直接读取而言，
 //      驱动时钟超过15M已经不会对性能有提升，对速度要求高的场合可以用MDMA的方式
-int8_t QSPI_W25Qxx_ReadBuffer(uint8_t* pBuffer, uint32_t ReadAddr, uint32_t NumByteToRead)
-{
+int8_t QSPI_W25Qxx_ReadBuffer(uint8_t* pBuffer, uint32_t ReadAddr, uint32_t NumByteToRead) {
 	QSPI_CommandTypeDef s_command;	// QSPI传输配置
 	
 	s_command.InstructionMode    = QSPI_INSTRUCTION_1_LINE;    		// 1线指令模式

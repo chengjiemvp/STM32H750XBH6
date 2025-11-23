@@ -25,16 +25,16 @@ int main(void) {
     bsp::sdram::init_sequence(&hsdram1);
     MX_RTC_Init();
     MX_USART1_UART_Init();
-    printf("[T.T] ===================================================================\n");
+    printf("[T.T] ==================================================================================\n");
     printf("[DEG] USART1 init complete\n");
     MX_QUADSPI_Init();
     printf("[DEG] QSPI init complete\n");
     int8_t w25q256_status = QSPI_W25Qxx_Init();
     printf("[DEG] W25Q256 INIT RESULT: %d\n", w25q256_status);
-    printf("[DEG] Starting W25Q256 read/write test\n");
+    printf("[DEG] starting W25Q256 read/write test\n");
     QSPI_W25Qxx_Test();
-    printf("[DEG] Starting W25Q256 read/write complete\n");
-    
+    printf("[DEG] W25Q256 read/write test finished\n");
+
     // test functions, e.g., test sdram
     printf("[DEG] all peripherals setup\n");
     printf("[DEG] running sdram test...\n");
