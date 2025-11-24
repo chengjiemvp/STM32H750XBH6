@@ -64,17 +64,17 @@ void JumpToApplication(void)
 
 
     if (!isValidStackPointer) {
-        printf("[ERR] Invalid stack pointer: 0x%08lX\n", appStack);
+        printf("[ERR] Invalid stack pointer: 0x%08lX\n", (unsigned long)appStack);
         return;
     }
 
     if ((appEntry < 0x90000000) || (appEntry >= 0x92000000)) {
-        printf("[ERR] Invalid entry point: 0x%08lX\n", appEntry);
+        printf("[ERR] Invalid entry point: 0x%08lX\n", (unsigned long)appEntry);
         return;
     }
 
     printf("[DEG] Jumping to application...\n");
-    printf("[DEG] Stack: 0x%08lX, Entry: 0x%08lX\n", appStack, appEntry);
+    printf("[DEG] Stack: 0x%08lX, Entry: 0x%08lX\n", (unsigned long)appStack, (unsigned long)appEntry);
 
     // 关闭中断
     __disable_irq();
