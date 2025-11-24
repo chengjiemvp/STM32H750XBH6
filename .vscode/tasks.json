@@ -2,7 +2,21 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Flash APP to QSPI (0x90000000)",
+      "label": "Build Application",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "build/Debug"],
+      "group": "build"
+    },
+    {
+      "label": "Build Bootloader",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "build/Debug", "--target", "bootloader"],
+      "group": "build"
+    },
+    {
+      "label": "Flash Application",
       "type": "shell",
       "command": "C:/ST/STM32CubeCLT_1.19.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe",
       "args": [
@@ -12,23 +26,18 @@
         "-v",
         "-hardRst"
       ],
-      "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": false
-      }
+      "group": "build"
     },
     {
-      "label": "Flash APP to QSPI (verify only)",
+      "label": "Flash Bootloader",
       "type": "shell",
       "command": "C:/ST/STM32CubeCLT_1.19.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe",
       "args": [
-        "-c", "port=swd", "freq=24000",
-        "-el", "${workspaceFolder}/W25Q256_STM32H7xx.stldr",
-        "-d", "${workspaceFolder}/build/Debug/STM32H750XBH6.elf", "0x90000000",
-        "-v"
+        "-c", "port=swd", "freq=24000", "reset=HWrst",
+        "-d", "${workspaceFolder}/build/Debug/bootloader.elf", "0x08000000",
+        "-v",
+        "-hardRst"
       ],
-      "problemMatcher": [],
       "group": "build"
     }
   ]

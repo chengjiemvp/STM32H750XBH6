@@ -1,3 +1,4 @@
+#ifdef BUILD_APPLICATION
 #include <cstdio>
 #include "main.h"
 #include "gpio.h"
@@ -54,3 +55,5 @@ int main(void) {
         HAL_Delay(20000);
     }
 }
+
+#endif // BUILD_APPLICATION
