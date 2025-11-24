@@ -20,6 +20,7 @@
 #include "main.h"
 #include "quadspi.h"
 #include "rtc.h"
+#include "stm32h7xx_hal_cortex.h"
 #include "usart.h"
 #include "gpio.h"
 #include "fmc.h"
@@ -155,7 +156,7 @@ void MPU_Config(void)
   MPU_InitStruct.SubRegionDisable = 0x87;
   MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
   MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
+  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
   MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
   MPU_InitStruct.IsCacheable = MPU_ACCESS_CACHEABLE;
   MPU_InitStruct.IsBufferable = MPU_ACCESS_BUFFERABLE;
@@ -169,8 +170,21 @@ void MPU_Config(void)
   MPU_InitStruct.Size = MPU_REGION_SIZE_32MB;
   MPU_InitStruct.SubRegionDisable = 0x0;
   MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL1;
-
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
+    // 🆕 Region 2: QSPI Flash - 允许代码执行
+  MPU_InitStruct.Number = MPU_REGION_NUMBER2;
+  MPU_InitStruct.BaseAddress = 0x90000000;          // QSPI映射地址
+  MPU_InitStruct.Size = MPU_REGION_SIZE_32MB;       // 32MB
+  MPU_InitStruct.SubRegionDisable = 0x0;
+  MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
+  MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;  // ✅ 允许执行
+  MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+  MPU_InitStruct.IsCacheable = MPU_ACCESS_CACHEABLE;           // 启用缓存提高性能
+  MPU_InitStruct.IsBufferable = MPU_ACCESS_BUFFERABLE;
+  HAL_MPU_ConfigRegion(&MPU_InitStruct);
+
   /* Enables the MPU */
   HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
 

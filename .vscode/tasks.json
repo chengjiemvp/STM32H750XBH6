@@ -1,0 +1,35 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Flash APP to QSPI (0x90000000)",
+      "type": "shell",
+      "command": "C:/ST/STM32CubeCLT_1.19.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe",
+      "args": [
+        "-c", "port=swd", "freq=24000", "reset=HWrst",
+        "-el", "${workspaceFolder}/W25Q256_STM32H7xx.stldr",
+        "-d", "${workspaceFolder}/build/Debug/STM32H750XBH6.elf", "0x90000000",
+        "-v",
+        "-hardRst"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Flash APP to QSPI (verify only)",
+      "type": "shell",
+      "command": "C:/ST/STM32CubeCLT_1.19.0/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe",
+      "args": [
+        "-c", "port=swd", "freq=24000",
+        "-el", "${workspaceFolder}/W25Q256_STM32H7xx.stldr",
+        "-d", "${workspaceFolder}/build/Debug/STM32H750XBH6.elf", "0x90000000",
+        "-v"
+      ],
+      "problemMatcher": [],
+      "group": "build"
+    }
+  ]
+}

@@ -55,6 +55,7 @@ ENTRY(Reset_Handler)
 /* Specify the memory areas */
 MEMORY
 {
+QSPI_FLASH (rx)    : ORIGIN = 0x90000000, LENGTH = 32M   /* QSPI映射地址 */
 DTCMRAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 128K
 RAM     (xrw)      : ORIGIN = 0x24000000, LENGTH = 512K
 RAM_D2  (xrw)      : ORIGIN = 0x30000000, LENGTH = 288K
@@ -79,7 +80,7 @@ SECTIONS
     . = ALIGN(4);
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(4);
-  } >FLASH
+  } >QSPI_FLASH    /* 向量表放在QSPI */
 
   /* The program code and other data goes into FLASH */
   .text :
@@ -96,7 +97,7 @@ SECTIONS
 
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
-  } >FLASH
+  } >QSPI_FLASH    /* 代码放在QSPI */
 
   /* Constant data goes into FLASH */
   .rodata :
@@ -105,14 +106,14 @@ SECTIONS
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     . = ALIGN(4);
-  } >FLASH
+  } >QSPI_FLASH
 
   .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     . = ALIGN(4);
     *(.ARM.extab* .gnu.linkonce.armextab.*)
     . = ALIGN(4);
-  } >FLASH
+  } >QSPI_FLASH
 
   .ARM (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
@@ -121,7 +122,7 @@ SECTIONS
     *(.ARM.exidx*)
     __exidx_end = .;
     . = ALIGN(4);
-  } >FLASH
+  } >QSPI_FLASH
 
   .preinit_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
@@ -130,7 +131,7 @@ SECTIONS
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
     . = ALIGN(4);
-  } >FLASH
+  } >QSPI_FLASH
 
   .init_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
@@ -140,7 +141,7 @@ SECTIONS
     KEEP (*(.init_array*))
     PROVIDE_HIDDEN (__init_array_end = .);
     . = ALIGN(4);
-  } >FLASH
+  } >QSPI_FLASH
 
   .fini_array (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
@@ -150,7 +151,7 @@ SECTIONS
     KEEP (*(.fini_array*))
     PROVIDE_HIDDEN (__fini_array_end = .);
     . = ALIGN(4);
-  } >FLASH
+  } >QSPI_FLASH
 
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
@@ -166,7 +167,7 @@ SECTIONS
     *(.RamFunc*)       /* .RamFunc* sections */
 
     . = ALIGN(4);
-  } >DTCMRAM AT> FLASH
+  } >DTCMRAM AT> QSPI_FLASH
 
  /* Initialized TLS data section */
   .tdata : ALIGN(4)
@@ -176,7 +177,7 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
     PROVIDE(__data_end = .);
     PROVIDE(__tdata_end = .);
-  } >DTCMRAM AT> FLASH
+  } >DTCMRAM AT> QSPI_FLASH
 
   PROVIDE( __tdata_start = ADDR(.tdata) );
   PROVIDE( __tdata_size = __tdata_end - __tdata_start );

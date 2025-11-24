@@ -22,8 +22,9 @@ namespace my_test {
     }
 
     // 返回 true 表示通过，false 表示失败
+    __attribute__((section(".RamFunc")))
     bool test_sdram_full_and_alias() {
-        volatile uint32_t *pSDRAM = reinterpret_cast<volatile uint32_t *>(0xC0000000UL);
+        volatile  uint32_t *pSDRAM = reinterpret_cast<volatile uint32_t *>(0xC0000000UL);
         constexpr uint32_t SDRAM_BYTES = 32UL * 1024UL * 1024UL;            // 32 MB
         constexpr uint32_t SDRAM_SIZE_WORDS = SDRAM_BYTES / sizeof(uint32_t); // 32MB / 4
         constexpr uint32_t WORDS_PER_ROW = 512U; // 列数 512 * 4 bytes -> 2048 bytes -> 512 words
